@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actividad práctica | Interpreta analíticas de Canvas</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --pink:#FF0050;
+      --pink-2:#FF3E78;
+      --pink-soft:#FFF0F5;
+      --dark:#171416;
+      --dark-2:#231F20;
+      --wine:#54152B;
+      --gray:#625B5E;
+      --light:#F8F6F7;
+      --border:#E9E1E4;
+      --white:#FFFFFF;
+      --success:#138A5B;
+    }
+
+    *{box-sizing:border-box}
+
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      background:#FFFFFF;
+      color:var(--dark-2);
+      font-family:Arial, Helvetica, sans-serif;
+      line-height:1.5;
+    }
+
+    button,input,textarea,select{font:inherit}
+
+    #sise-actividad-analitica{
+      width:100%;
+      max-width:1400px;
+      margin:0 auto;
+      padding:0 0 46px;
+      overflow:hidden;
+      background:#FFFFFF;
+    }
+
+    .sise-container{
+      width:100%;
+      max-width:1180px;
+      margin:0 auto;
+      padding:0 24px;
+    }
+
+    .sise-hero{
+      position:relative;
+      overflow:hidden;
+      padding:64px 0 92px;
+      color:#FFFFFF;
+      background:
+        radial-gradient(circle at 90% 10%,rgba(255,0,80,.25),transparent 34%),
+        radial-gradient(circle at 8% 100%,rgba(115,22,54,.45),transparent 38%),
+        linear-gradient(125deg,#151314 0%,#241B1F 52%,#4A1026 100%);
+    }
+
+    .sise-hero:before{
+      content:"";
+      position:absolute;
+      width:420px;
+      height:420px;
+      right:-120px;
+      top:-170px;
+      border:2px solid rgba(255,255,255,.08);
+      border-radius:50%;
+    }
+
+    .sise-hero:after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      right:55px;
+      top:-55px;
+      border:1px solid rgba(255,0,80,.22);
+      border-radius:50%;
+    }
+
+    .sise-dot-pattern{
+      position:absolute;
+      left:24px;
+      top:22px;
+      width:105px;
+      height:75px;
+      opacity:.4;
+      background-image:radial-gradient(circle,#FF0050 1.6px,transparent 1.7px);
+      background-size:16px 16px;
+    }
+
+    .sise-hero-content{
+      position:relative;
+      z-index:2;
+      max-width:1000px;
+    }
+
+    .sise-eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+      padding:9px 15px;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:999px;
+      color:#FFFFFF;
+      background:rgba(255,255,255,.06);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:1.1px;
+      text-transform:uppercase;
+    }
+
+    .sise-eyebrow-dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--pink);
+      box-shadow:0 0 0 5px rgba(255,0,80,.14);
+    }
+
+    .sise-hero h1{
+      max-width:1050px;
+      margin:0 0 20px;
+      color:#FFFFFF;
+      font-size:clamp(38px,5.5vw,64px);
+      line-height:1.06;
+      font-weight:900;
+      letter-spacing:-1.8px;
+    }
+
+    .sise-hero h1 span{color:var(--pink)}
+
+    .sise-hero p{
+      max-width:920px;
+      margin:0;
+      color:rgba(255,255,255,.84);
+      font-size:19px;
+      line-height:1.65;
+    }
+
+    .sise-progress-wrap{
+      position:relative;
+      z-index:4;
+      max-width:1180px;
+      margin:-42px auto 34px;
+      padding:0 24px;
+    }
+
+    .sise-progress-card{
+      padding:24px 26px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:17px;
+      color:#FFFFFF;
+      background:
+        radial-gradient(circle at 96% 10%,rgba(255,0,80,.22),transparent 38%),
+        linear-gradient(135deg,#211D1F,#331421);
+      box-shadow:0 16px 38px rgba(35,31,32,.2);
+    }
+
+    .sise-progress-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px;
+      margin-bottom:12px;
+    }
+
+    .sise-progress-label{
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.5px;
+    }
+
+    .sise-progress-step{
+      color:#FF91B2;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .sise-progress-track{
+      height:10px;
+      overflow:hidden;
+      border-radius:999px;
+      background:rgba(255,255,255,.15);
+    }
+
+    .sise-progress-fill{
+      width:20%;
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg,var(--pink),#FF8EB1);
+      transition:width .35s ease;
+    }
+
+    .sise-panel{
+      display:none;
+      animation:siseFade .3s ease;
+    }
+
+    .sise-panel.active{display:block}
+
+    @keyframes siseFade{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .sise-card{
+      margin-bottom:28px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#FFFFFF;
+      box-shadow:0 14px 34px rgba(35,31,32,.08);
+    }
+
+    .sise-card-header{
+      position:relative;
+      overflow:hidden;
+      padding:29px 32px;
+      color:#FFFFFF;
+      background:
+        radial-gradient(circle at 95% 0,rgba(255,0,80,.23),transparent 37%),
+        linear-gradient(130deg,#211D1F 0%,#421123 100%);
+    }
+
+    .sise-card-header:after{
+      content:"";
+      position:absolute;
+      width:145px;
+      height:145px;
+      right:-42px;
+      top:-68px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:50%;
+    }
+
+    .sise-step-badge{
+      position:relative;
+      z-index:2;
+      display:inline-block;
+      margin-bottom:10px;
+      padding:7px 13px;
+      border-radius:999px;
+      color:#FFFFFF;
+      background:var(--pink);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:1px;
+    }
+
+    .sise-card-header h2{
+      position:relative;
+      z-index:2;
+      margin:0;
+      color:#FFFFFF;
+      font-size:30px;
+      line-height:1.25;
+    }
+
+    .sise-card-body{padding:30px 32px 34px}
+
+    .sise-intro-box{
+      margin-bottom:24px;
+      padding:22px 24px;
+      border-left:6px solid var(--pink);
+      border-radius:0 14px 14px 0;
+      background:linear-gradient(90deg,#FFF0F5,#FFF9FB);
+    }
+
+    .sise-intro-box p{
+      margin:0;
+      color:#433B3E;
+      font-size:16px;
+      line-height:1.65;
+    }
+
+    .sise-section-title{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:28px 0 14px;
+      color:#231F20;
+      font-size:22px;
+      line-height:1.25;
+    }
+
+    .sise-section-title:first-child{margin-top:0}
+
+    .sise-title-number{
+      display:inline-flex;
+      flex:0 0 auto;
+      align-items:center;
+      justify-content:center;
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      color:#FFFFFF;
+      background:var(--pink);
+      font-size:14px;
+      box-shadow:0 0 0 6px rgba(255,0,80,.08);
+    }
+
+    .sise-grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .sise-info-card{
+      padding:20px;
+      border:1px solid #EFE4E8;
+      border-radius:14px;
+      background:#FFFFFF;
+      box-shadow:0 7px 18px rgba(35,31,32,.05);
+    }
+
+    .sise-info-card strong{
+      display:block;
+      margin-bottom:8px;
+      color:var(--pink);
+      font-size:17px;
+    }
+
+    .sise-info-card p{
+      margin:0;
+      color:#5F575A;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .sise-form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+
+    .sise-field{margin-bottom:18px}
+
+    .sise-field.full{grid-column:1 / -1}
+
+    .sise-field label{
+      display:block;
+      margin-bottom:8px;
+      color:#30282C;
+      font-size:14px;
+      font-weight:800;
+    }
+
+    .sise-required{color:var(--pink)}
+
+    .sise-field input,
+    .sise-field textarea,
+    .sise-field select{
+      width:100%;
+      border:1px solid #DCCFD4;
+      border-radius:10px;
+      background:#FFFFFF;
+      color:#2F292B;
+      outline:none;
+      transition:border-color .2s ease,box-shadow .2s ease;
+    }
+
+    .sise-field input,
+    .sise-field select{
+      min-height:48px;
+      padding:11px 13px;
+    }
+
+    .sise-field textarea{
+      min-height:118px;
+      padding:13px;
+      resize:vertical;
+      line-height:1.55;
+    }
+
+    .sise-field textarea.compact{min-height:92px}
+
+    .sise-field input:focus,
+    .sise-field textarea:focus,
+    .sise-field select:focus{
+      border-color:var(--pink);
+      box-shadow:0 0 0 4px rgba(255,0,80,.09);
+    }
+
+    .sise-case-box{
+      margin-bottom:26px;
+      padding:24px 25px;
+      border:1px solid #E6DDE0;
+      border-left:7px solid var(--pink);
+      border-radius:14px;
+      background:#FAF8F9;
+    }
+
+    .sise-case-box h3{
+      margin:0 0 12px;
+      color:#231F20;
+      font-size:23px;
+    }
+
+    .sise-case-box p{
+      margin:0;
+      color:#554E51;
+      font-size:16px;
+      line-height:1.68;
+    }
+
+    .sise-preview{
+      margin:18px 0 26px;
+      padding:20px 22px;
+      border:1px solid #F0DDE4;
+      border-radius:14px;
+      background:linear-gradient(135deg,#FFF7FA,#FFFFFF);
+    }
+
+    .sise-preview h4{
+      margin:0 0 10px;
+      color:#231F20;
+      font-size:18px;
+    }
+
+    .sise-preview p{
+      margin:0;
+      color:#554E51;
+      font-size:14px;
+      line-height:1.65;
+      white-space:pre-line;
+    }
+
+    .sise-tip-box{
+      margin:12px 0 18px;
+      padding:14px 16px;
+      border:1px solid #F3D5E0;
+      border-radius:10px;
+      color:#55484D;
+      background:#FFF5F8;
+      font-size:13.5px;
+      line-height:1.55;
+    }
+
+    .sise-evidence-editor{
+      margin-top:16px;
+      display:grid;
+      gap:16px;
+    }
+
+    .sise-evidence-card{
+      padding:18px;
+      border:1px solid #EEE3E7;
+      border-radius:14px;
+      background:#FFFDFE;
+    }
+
+    .sise-evidence-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .sise-evidence-index{
+      width:30px;
+      height:30px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      color:#FFFFFF;
+      background:var(--pink);
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .sise-evidence-head strong{
+      color:#231F20;
+      font-size:16px;
+    }
+
+    .sise-source-choice{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin:16px 0 20px;
+    }
+
+    .sise-source-option{
+      position:relative;
+      padding:18px;
+      border:1px solid #E5DCE0;
+      border-radius:13px;
+      background:#FFFFFF;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .sise-source-option:hover{
+      border-color:var(--pink);
+      transform:translateY(-1px);
+    }
+
+    .sise-source-option input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .sise-source-option.active{
+      border:2px solid var(--pink);
+      background:#FFF7FA;
+      box-shadow:0 0 0 4px rgba(255,0,80,.06);
+    }
+
+    .sise-source-option strong{
+      display:block;
+      margin-bottom:6px;
+      color:#231F20;
+      font-size:16px;
+    }
+
+    .sise-source-option span{
+      display:block;
+      color:#655D60;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .sise-case-data{
+      display:none;
+      margin:16px 0 22px;
+      overflow:hidden;
+      border:1px solid #E8DEE2;
+      border-radius:14px;
+      background:#FFFFFF;
+    }
+
+    .sise-case-data.show{display:block}
+
+    .sise-case-data-head{
+      padding:16px 18px;
+      color:#FFFFFF;
+      background:linear-gradient(135deg,#231F20,#481326);
+    }
+
+    .sise-case-data-head strong{
+      display:block;
+      font-size:16px;
+    }
+
+    .sise-case-data-head span{
+      display:block;
+      margin-top:3px;
+      color:#F7D4E0;
+      font-size:12px;
+    }
+
+    .sise-data-table-wrap{overflow:auto}
+
+    .sise-data-table{
+      width:100%;
+      min-width:760px;
+      border-collapse:collapse;
+    }
+
+    .sise-data-table th,
+    .sise-data-table td{
+      padding:11px 12px;
+      border-bottom:1px solid #EEE6E9;
+      text-align:left;
+      color:#4D4648;
+      font-size:12.5px;
+      line-height:1.4;
+    }
+
+    .sise-data-table th{
+      color:#231F20;
+      background:#F9F6F7;
+      font-weight:900;
+    }
+
+    .sise-data-table tr:last-child td{border-bottom:0}
+
+    .sise-warning{
+      margin-top:18px;
+      padding:15px 17px;
+      border:1px solid #F3D5E0;
+      border-radius:10px;
+      color:#5A3D47;
+      background:#FFF5F8;
+      font-size:13.5px;
+      line-height:1.55;
+    }
+
+    .sise-coherence-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin:16px 0 24px;
+    }
+
+    .sise-coherence{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:15px;
+      border:1px solid #E7DDE1;
+      border-radius:11px;
+      background:#FFFFFF;
+      color:#4E4749;
+      font-size:13.5px;
+      line-height:1.5;
+      cursor:pointer;
+    }
+
+    .sise-coherence input{
+      margin-top:3px;
+      accent-color:var(--pink);
+    }
+
+    .sise-note{
+      margin-top:18px;
+      padding:16px 18px;
+      border:1px solid #F3D5E0;
+      border-radius:10px;
+      background:#FFF5F8;
+      color:#55484D;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .sise-error{
+      display:none;
+      margin:0 0 18px;
+      padding:14px 16px;
+      border-left:5px solid var(--pink);
+      border-radius:0 9px 9px 0;
+      color:#6A1734;
+      background:#FFF0F5;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .sise-error.show{display:block}
+
+    .sise-actions{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      margin-top:26px;
+    }
+
+    .sise-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:50px;
+      padding:13px 24px;
+      border:0;
+      border-radius:10px;
+      cursor:pointer;
+      text-decoration:none;
+      font-size:15px;
+      font-weight:900;
+      transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+    }
+
+    .sise-btn:hover{transform:translateY(-2px)}
+
+    .sise-btn-primary{
+      color:#FFFFFF;
+      background:linear-gradient(135deg,#FF0050,#E00046);
+      box-shadow:0 11px 24px rgba(255,0,80,.22);
+    }
+
+    .sise-btn-primary:hover{box-shadow:0 14px 28px rgba(255,0,80,.3)}
+
+    .sise-btn-secondary{
+      color:#231F20;
+      border:1px solid #D9CDD1;
+      background:#FFFFFF;
+    }
+
+    .sise-btn-download{
+      min-width:260px;
+      color:#FFFFFF;
+      background:linear-gradient(135deg,#138A5B,#0B6843);
+      box-shadow:0 11px 24px rgba(19,138,91,.2);
+    }
+
+    .sise-btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+
+    .sise-complete{
+      padding:34px;
+      border-radius:17px;
+      text-align:center;
+      color:#FFFFFF;
+      background:
+        radial-gradient(circle at 15% 90%,rgba(255,0,80,.16),transparent 35%),
+        radial-gradient(circle at 90% 10%,rgba(255,0,80,.24),transparent 35%),
+        linear-gradient(135deg,#171416,#4A1026);
+    }
+
+    .sise-complete-icon{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:74px;
+      height:74px;
+      margin:0 auto 20px;
+      border-radius:50%;
+      color:#FFFFFF;
+      background:var(--pink);
+      font-size:32px;
+      font-weight:900;
+      box-shadow:0 0 0 9px rgba(255,0,80,.14);
+    }
+
+    .sise-complete h2{
+      margin:0 0 12px;
+      color:#FFFFFF;
+      font-size:31px;
+    }
+
+    .sise-complete p{
+      max-width:820px;
+      margin:0 auto 24px;
+      color:rgba(255,255,255,.82);
+      font-size:16px;
+      line-height:1.65;
+    }
+
+    .sise-upload-alert{
+      display:none;
+      max-width:850px;
+      margin:22px auto 0;
+      padding:17px 18px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:11px;
+      color:#FFFFFF;
+      background:rgba(255,255,255,.1);
+      font-size:15px;
+      line-height:1.55;
+    }
+
+    .sise-upload-alert.show{display:block}
+
+    .sise-next-activity-wrap{
+      display:none;
+      justify-content:center;
+      margin-top:18px;
+    }
+
+    .sise-next-activity-wrap.show{display:flex}
+
+    @media screen and (max-width:850px){
+      .sise-grid-3,
+      .sise-form-grid,
+      .sise-coherence-grid,
+      .sise-source-choice{
+        grid-template-columns:1fr;
+      }
+
+      .sise-field.full{grid-column:auto}
+    }
+
+    @media screen and (max-width:600px){
+      .sise-container,
+      .sise-progress-wrap{
+        padding-left:16px;
+        padding-right:16px;
+      }
+
+      .sise-hero{padding:46px 0 74px}
+      .sise-hero h1{font-size:37px;letter-spacing:-1px}
+      .sise-hero p{font-size:17px}
+      .sise-card-header,
+      .sise-card-body{padding:24px 20px}
+      .sise-card-header h2{font-size:25px}
+      .sise-actions{flex-direction:column-reverse}
+      .sise-btn{width:100%}
+      .sise-complete{padding:30px 20px}
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="sise-actividad-analitica">
+
+  <header class="sise-hero">
+    <div class="sise-dot-pattern"></div>
+    <div class="sise-container">
+      <div class="sise-hero-content">
+        <div class="sise-eyebrow">
+          <span class="sise-eyebrow-dot"></span>
+          ACTIVIDAD PRÁCTICA - MÓDULO 2 - TEMA 4
+        </div>
+
+        <h1>Construye una <span>ficha de interpretación de analíticas</span> para tu aula virtual</h1>
+
+        <p>
+          Practica la lectura crítica de reportes e indicadores de Canvas antes de tomar una decisión pedagógica. Identifica qué evidencia observas, qué puedes interpretar con sustento y qué información adicional necesitarías revisar.
+        </p>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="sise-progress-wrap">
+    <div class="sise-progress-card">
+      <div class="sise-progress-top">
+        <span class="sise-progress-label">Progreso de la actividad</span>
+        <span class="sise-progress-step" id="progressLabel">Paso 1 de 5</span>
+      </div>
+      <div class="sise-progress-track">
+        <div class="sise-progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="sise-container">
+
+    <!-- PASO 1 -->
+    <section class="sise-panel active" data-step="1">
+      <div class="sise-card">
+        <div class="sise-card-header">
+          <span class="sise-step-badge">PASO 01</span>
+          <h2>Indicaciones y punto de partida</h2>
+        </div>
+
+        <div class="sise-card-body">
+
+          <div class="sise-intro-box">
+            <p>
+              <strong>Propósito:</strong> elaborarás una ficha de interpretación de analíticas que te ayude a distinguir entre datos, evidencias e interpretaciones antes de decidir una intervención. Este producto será un insumo para la siguiente actividad.
+            </p>
+          </div>
+
+          <h3 class="sise-section-title">
+            <span class="sise-title-number">01</span>
+            ¿Cómo desarrollar la actividad?
+          </h3>
+
+          <div class="sise-grid-3">
+            <div class="sise-info-card">
+              <strong>Define una pregunta</strong>
+              <p>Establece qué necesitas comprender: participación, cumplimiento, desempeño o una posible señal de riesgo.</p>
+            </div>
+
+            <div class="sise-info-card">
+              <strong>Contrasta evidencias</strong>
+              <p>Registra datos de al menos dos fuentes o indicadores y evita interpretar una cifra de manera aislada.</p>
+            </div>
+
+            <div class="sise-info-card">
+              <strong>Interpreta con cuidado</strong>
+              <p>Diferencia lo que los datos permiten afirmar de aquello que todavía necesita ser corroborado.</p>
+            </div>
+          </div>
+
+          <h3 class="sise-section-title">
+            <span class="sise-title-number">02</span>
+            ¿Qué vas a construir?
+          </h3>
+
+          <div class="sise-grid-3">
+            <div class="sise-info-card">
+              <strong>Pregunta de análisis</strong>
+              <p>Una pregunta pedagógica concreta que oriente la revisión de las analíticas.</p>
+            </div>
+
+            <div class="sise-info-card">
+              <strong>Registro de evidencias</strong>
+              <p>Datos e indicadores organizados para reconocer patrones o señales relevantes.</p>
+            </div>
+
+            <div class="sise-info-card">
+              <strong>Interpretación sustentada</strong>
+              <p>Una lectura que diferencie conclusiones posibles de aspectos que todavía requieren información adicional.</p>
+            </div>
+          </div>
+
+          <h3 class="sise-section-title">
+            <span class="sise-title-number">03</span>
+            Datos del participante
+          </h3>
+
+          <div class="sise-error" id="identityError">
+            Completa nombres, apellidos, correo y curso antes de continuar.
+          </div>
+
+          <div class="sise-form-grid">
+
+            <div class="sise-field">
+              <label for="nombres">Nombres <span class="sise-required">*</span></label>
+              <input id="nombres" type="text" autocomplete="given-name" placeholder="Escribe tus nombres">
+            </div>
+
+            <div class="sise-field">
+              <label for="apellidos">Apellidos <span class="sise-required">*</span></label>
+              <input id="apellidos" type="text" autocomplete="family-name" placeholder="Escribe tus apellidos">
+            </div>
+
+            <div class="sise-field full">
+              <label for="correo">Correo electrónico <span class="sise-required">*</span></label>
+              <input id="correo" type="email" autocomplete="email" placeholder="nombre@correo.com">
+            </div>
+
+            <div class="sise-field full">
+              <label for="curso">Curso o asignatura <span class="sise-required">*</span></label>
+              <input id="curso" type="text" placeholder="Ej. Gestión de Proyectos">
+            </div>
+
+          </div>
+
+          <div class="sise-warning">
+            <strong>Privacidad:</strong> si trabajas con información de un curso real, no incluyas nombres completos, correos, códigos u otros datos que permitan identificar a tus estudiantes. Utiliza iniciales, códigos ficticios o información agregada.
+          </div>
+
+          <div class="sise-note">
+            Tus datos y las respuestas de la actividad se incluirán automáticamente en el PDF descargable.
+          </div>
+
+          <div class="sise-actions">
+            <span></span>
+            <button class="sise-btn sise-btn-primary" type="button" onclick="nextStep()">Siguiente →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PASO 2 -->
+    <section class="sise-panel" data-step="2">
+      <div class="sise-card">
+        <div class="sise-card-header">
+          <span class="sise-step-badge">PASO 02</span>
+          <h2>Define qué quieres comprender</h2>
+        </div>
+
+        <div class="sise-card-body">
+
+          <div class="sise-error" id="focusError">
+            Selecciona una fuente de trabajo y completa la pregunta, el foco y el periodo de análisis.
+          </div>
+
+          <div class="sise-case-box">
+            <h3>Elige tu punto de partida</h3>
+            <p>Puedes trabajar con datos propios de un curso o utilizar el caso ficticio de Gestión de Proyectos incluido en este recurso.</p>
+          </div>
+
+          <div class="sise-source-choice">
+
+            <label class="sise-source-option" id="realOption">
+              <input type="radio" name="sourceMode" value="real" onchange="setSourceMode('real')">
+              <strong>Usaré datos de mi curso</strong>
+              <span>Trabaja con indicadores reales, pero protege la identidad de tus estudiantes.</span>
+            </label>
+
+            <label class="sise-source-option" id="caseOption">
+              <input type="radio" name="sourceMode" value="case" onchange="setSourceMode('case')">
+              <strong>Usaré el caso de práctica</strong>
+              <span>Utiliza información ficticia del curso Gestión de Proyectos para completar la ficha.</span>
+            </label>
+
+          </div>
+
+          <div class="sise-case-data" id="caseData">
+            <div class="sise-case-data-head">
+              <strong>Caso ficticio · Gestión de Proyectos</strong>
+              <span>Datos creados únicamente para esta actividad práctica.</span>
+            </div>
+
+            <div class="sise-data-table-wrap">
+              <table class="sise-data-table">
+                <thead>
+                  <tr>
+                    <th>Indicador</th>
+                    <th>Semana 5</th>
+                    <th>Semana 6</th>
+                    <th>Semana 7</th>
+                    <th>Semana 8</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Participaciones en el curso</td>
+                    <td>8</td>
+                    <td>6</td>
+                    <td>4</td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td>Actividades pendientes</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>2</td>
+                  </tr>
+                  <tr>
+                    <td>Desempeño promedio</td>
+                    <td>15/20</td>
+                    <td>14/20</td>
+                    <td>13/20</td>
+                    <td>11/20</td>
+                  </tr>
+                  <tr>
+                    <td>Frecuencia de acceso</td>
+                    <td>Alta</td>
+                    <td>Media</td>
+                    <td>Media</td>
+                    <td>Baja</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sise-form-grid">
+
+            <div class="sise-field">
+              <label for="foco">Foco del análisis <span class="sise-required">*</span></label>
+              <select id="foco">
+                <option value="">Selecciona una opción</option>
+                <option>Participación</option>
+                <option>Cumplimiento de actividades</option>
+                <option>Desempeño</option>
+                <option>Posible riesgo académico</option>
+                <option>Combinación de indicadores</option>
+              </select>
+            </div>
+
+            <div class="sise-field">
+              <label for="periodo">Periodo o momento analizado <span class="sise-required">*</span></label>
+              <input id="periodo" type="text" placeholder="Ej. Semanas 5 a 8">
+            </div>
+
+            <div class="sise-field full">
+              <label for="preguntaAnalisis">Pregunta que orientará tu revisión <span class="sise-required">*</span></label>
+              <textarea id="preguntaAnalisis" placeholder="Ej. ¿Existe una disminución sostenida de participación acompañada de dificultades en el cumplimiento de actividades?"></textarea>
+            </div>
+
+          </div>
+
+          <div class="sise-tip-box">
+            <strong>Recuerda:</strong> una buena pregunta de análisis no busca confirmar una conclusión previa. Debe ayudarte a comprender qué está ocurriendo y qué evidencias necesitas revisar.
+          </div>
+
+          <div class="sise-actions">
+            <button class="sise-btn sise-btn-secondary" type="button" onclick="prevStep()">← Regresar</button>
+            <button class="sise-btn sise-btn-primary" type="button" onclick="nextStep()">Siguiente →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PASO 3 -->
+    <section class="sise-panel" data-step="3">
+      <div class="sise-card">
+        <div class="sise-card-header">
+          <span class="sise-step-badge">PASO 03</span>
+          <h2>Registra e interpreta las evidencias</h2>
+        </div>
+
+        <div class="sise-card-body">
+
+          <div class="sise-error" id="evidenceError">
+            Completa las dos evidencias, sus fuentes, lo que te permiten observar y lo que todavía no puedes afirmar.
+          </div>
+
+          <div class="sise-intro-box">
+            <p>
+              Registra <strong>dos evidencias o indicadores</strong>. No necesitas diseñar todavía una intervención. En este paso debes concentrarte en leer los datos y distinguir entre observación e interpretación.
+            </p>
+          </div>
+
+          <div class="sise-evidence-editor">
+
+            <div class="sise-evidence-card">
+              <div class="sise-evidence-head">
+                <span class="sise-evidence-index">1</span>
+                <strong>Evidencia 1</strong>
+              </div>
+
+              <div class="sise-form-grid">
+                <div class="sise-field">
+                  <label for="fuente1">Fuente o reporte <span class="sise-required">*</span></label>
+                  <input id="fuente1" type="text" placeholder="Ej. Actividad semanal en línea">
+                </div>
+
+                <div class="sise-field">
+                  <label for="dato1">Dato o indicador observado <span class="sise-required">*</span></label>
+                  <input id="dato1" type="text" placeholder="Ej. Participaciones: 8 → 6 → 4 → 3">
+                </div>
+
+                <div class="sise-field">
+                  <label for="dice1">¿Qué te permite observar? <span class="sise-required">*</span></label>
+                  <textarea class="compact" id="dice1" placeholder="Describe la tendencia o patrón visible en los datos."></textarea>
+                </div>
+
+                <div class="sise-field">
+                  <label for="noDice1">¿Qué NO puedes afirmar todavía? <span class="sise-required">*</span></label>
+                  <textarea class="compact" id="noDice1" placeholder="Indica qué explicación o causa aún no puede concluirse con esta evidencia."></textarea>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="sise-evidence-card">
+              <div class="sise-evidence-head">
+                <span class="sise-evidence-index">2</span>
+                <strong>Evidencia 2</strong>
+              </div>
+
+              <div class="sise-form-grid">
+                <div class="sise-field">
+                  <label for="fuente2">Fuente o reporte <span class="sise-required">*</span></label>
+                  <input id="fuente2" type="text" placeholder="Ej. Reporte de tareas faltantes">
+                </div>
+
+                <div class="sise-field">
+                  <label for="dato2">Dato o indicador observado <span class="sise-required">*</span></label>
+                  <input id="dato2" type="text" placeholder="Ej. 2 actividades pendientes en la semana 8">
+                </div>
+
+                <div class="sise-field">
+                  <label for="dice2">¿Qué te permite observar? <span class="sise-required">*</span></label>
+                  <textarea class="compact" id="dice2" placeholder="Describe qué información aporta esta segunda evidencia."></textarea>
+                </div>
+
+                <div class="sise-field">
+                  <label for="noDice2">¿Qué NO puedes afirmar todavía? <span class="sise-required">*</span></label>
+                  <textarea class="compact" id="noDice2" placeholder="Indica qué conclusión sería apresurada o necesitaría más información."></textarea>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="sise-preview">
+            <h4>Lectura integrada</h4>
+            <p id="evidencePreview">Completa las dos evidencias para visualizar una síntesis de tu análisis.</p>
+          </div>
+
+          <div class="sise-actions">
+            <button class="sise-btn sise-btn-secondary" type="button" onclick="prevStep()">← Regresar</button>
+            <button class="sise-btn sise-btn-primary" type="button" onclick="nextStep()">Siguiente →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PASO 4 -->
+    <section class="sise-panel" data-step="4">
+      <div class="sise-card">
+        <div class="sise-card-header">
+          <span class="sise-step-badge">PASO 04</span>
+          <h2>Construye una interpretación sustentada</h2>
+        </div>
+
+        <div class="sise-card-body">
+
+          <div class="sise-error" id="interpretationError">
+            Completa la interpretación, la evidencia adicional, la revisión de coherencia y la reflexión final.
+          </div>
+
+          <div class="sise-intro-box">
+            <p>
+              Ahora integra las evidencias. Tu objetivo es formular una <strong>interpretación provisional y sustentada</strong>, sin convertirla todavía en un plan de mejora. Debes dejar claro qué observas y qué información adicional revisarías antes de decidir.
+            </p>
+          </div>
+
+          <div class="sise-preview">
+            <h4>Tu análisis en síntesis</h4>
+            <p id="finalPreview"></p>
+          </div>
+
+          <div class="sise-field">
+            <label for="interpretacion">
+              Interpretación provisional <span class="sise-required">*</span>
+            </label>
+            <textarea id="interpretacion" placeholder="Ej. La combinación de menor participación, actividades pendientes y descenso del desempeño sugiere una señal que requiere seguimiento; sin embargo, los datos no permiten identificar todavía la causa."></textarea>
+          </div>
+
+          <div class="sise-field">
+            <label for="evidenciaAdicional">
+              ¿Qué evidencia adicional revisarías antes de tomar una decisión pedagógica? <span class="sise-required">*</span>
+            </label>
+            <textarea id="evidenciaAdicional" placeholder="Ej. Revisaría la vista individual del estudiante, la evolución de sus entregas y la comunicación previa antes de decidir una acción."></textarea>
+          </div>
+
+          <h3 class="sise-section-title">
+            <span class="sise-title-number">01</span>
+            Prueba de coherencia
+          </h3>
+
+          <div class="sise-coherence-grid">
+
+            <label class="sise-coherence">
+              <input type="checkbox" class="coherence-check" value="La pregunta de análisis está relacionada con los indicadores seleccionados">
+              <span>La pregunta de análisis está relacionada con los indicadores seleccionados.</span>
+            </label>
+
+            <label class="sise-coherence">
+              <input type="checkbox" class="coherence-check" value="La interpretación se apoya en más de una evidencia">
+              <span>La interpretación se apoya en más de una evidencia.</span>
+            </label>
+
+            <label class="sise-coherence">
+              <input type="checkbox" class="coherence-check" value="He diferenciado lo que los datos muestran de aquello que todavía no puedo concluir">
+              <span>He diferenciado lo que los datos muestran de aquello que todavía no puedo concluir.</span>
+            </label>
+
+            <label class="sise-coherence">
+              <input type="checkbox" class="coherence-check" value="He identificado qué información adicional necesito antes de tomar una decisión">
+              <span>He identificado qué información adicional necesito antes de tomar una decisión.</span>
+            </label>
+
+          </div>
+
+          <h3 class="sise-section-title">
+            <span class="sise-title-number">02</span>
+            Reflexión final
+          </h3>
+
+          <div class="sise-field">
+            <label for="reflexion">
+              ¿Cómo cambia tu lectura del curso cuando analizas varias evidencias antes de tomar una decisión?
+              <span class="sise-required">*</span>
+            </label>
+
+            <textarea id="reflexion" placeholder="Explica brevemente cómo el contraste de evidencias evita conclusiones apresuradas y mejora la toma de decisiones."></textarea>
+          </div>
+
+          <div class="sise-actions">
+            <button class="sise-btn sise-btn-secondary" type="button" onclick="prevStep()">← Regresar</button>
+            <button class="sise-btn sise-btn-primary" type="button" onclick="nextStep()">Finalizar actividad →</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PASO 5 -->
+    <section class="sise-panel" data-step="5">
+      <div class="sise-complete">
+
+        <div class="sise-complete-icon">✓</div>
+
+        <h2>Actividad completada</h2>
+
+        <p>
+          Revisa que tu interpretación sea clara y descarga la ficha en PDF. El archivo integrará tu pregunta de análisis, las evidencias utilizadas, lo que puedes y no puedes concluir, la información adicional que revisarías y tu reflexión final.
+        </p>
+
+        <button class="sise-btn sise-btn-download" type="button" onclick="downloadPDF()">
+          Descargar ficha de analítica en PDF
+        </button>
+
+        <div class="sise-upload-alert" id="uploadAlert">
+          <strong>Importante:</strong> Este es el archivo que debes subir en esta misma sección de tarea para ser calificado. Verifica que el PDF se haya descargado correctamente y guárdalo también, ya que lo utilizarás en la siguiente actividad.
+        </div>
+
+        <div class="sise-next-activity-wrap" id="nextActivityWrap">
+          <a
+            class="sise-btn sise-btn-primary"
+            href="https://aulad.educad.pe/courses/640/discussion_topics/908?module_item_id=6076"
+            target="_top"
+            onclick="window.top.location.href=this.href; return false;">
+            Continuar con el curso →
+          </a>
+        </div>
+
+        <div class="sise-actions">
+          <button class="sise-btn sise-btn-secondary" type="button" onclick="prevStep()">← Revisar respuestas</button>
+          <span></span>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+
+<script>
+(function(){
+  "use strict";
+
+  var currentStep = 1;
+  var totalSteps = 5;
+  var sourceMode = "";
+
+  function value(id){
+    var el=document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+
+  function setError(id,show){
+    var el=document.getElementById(id);
+    if(el){el.classList.toggle("show",show);}
+  }
+
+  function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function allCoherenceMarked(){
+    var checks=Array.from(document.querySelectorAll(".coherence-check"));
+    return checks.length>0 && checks.every(function(c){return c.checked;});
+  }
+
+  function coherenceValues(){
+    return Array.from(document.querySelectorAll(".coherence-check"))
+      .filter(function(c){return c.checked;})
+      .map(function(c){return c.value;});
+  }
+
+  function escapeHtml(text){
+    return String(text)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  window.setSourceMode=function(mode){
+    sourceMode=mode;
+
+    document.getElementById("realOption").classList.toggle("active",mode==="real");
+    document.getElementById("caseOption").classList.toggle("active",mode==="case");
+    document.getElementById("caseData").classList.toggle("show",mode==="case");
+
+    if(mode==="case"){
+      if(!value("curso"))document.getElementById("curso").value="Gestión de Proyectos";
+      if(!value("periodo"))document.getElementById("periodo").value="Semanas 5 a 8";
+      if(!value("foco"))document.getElementById("foco").value="Combinación de indicadores";
+      if(!value("preguntaAnalisis")){
+        document.getElementById("preguntaAnalisis").value=
+          "¿Existe una combinación de señales que justifique revisar con mayor profundidad lo que está ocurriendo en el curso?";
+      }
+      prefillCaseEvidence();
+    }
+  };
+
+  function prefillCaseEvidence(){
+    var data={
+      fuente1:"Actividad semanal en línea",
+      dato1:"Participaciones: 8 → 6 → 4 → 3 durante las semanas 5 a 8",
+      dice1:"Se observa una disminución sostenida de la participación a lo largo de cuatro semanas.",
+      noDice1:"No permite afirmar por sí sola cuál es la causa de la disminución ni que exista desinterés.",
+      fuente2:"Reporte de tareas faltantes y desempeño",
+      dato2:"Actividades pendientes: 0 → 1 → 1 → 2 y desempeño: 15/20 → 14/20 → 13/20 → 11/20",
+      dice2:"La reducción de participación coincide con mayor acumulación de pendientes y descenso del desempeño.",
+      noDice2:"No permite concluir automáticamente que el estudiante no quiera participar ni identificar la causa exacta."
+    };
+
+    Object.keys(data).forEach(function(id){
+      var el=document.getElementById(id);
+      if(el && !el.value){el.value=data[id];}
+    });
+
+    updateEvidencePreview();
+  }
+
+  function validateStep(step){
+
+    if(step===1){
+      var ok=
+        value("nombres") &&
+        value("apellidos") &&
+        value("correo") &&
+        isValidEmail(value("correo")) &&
+        value("curso");
+
+      setError("identityError",!ok);
+      return Boolean(ok);
+    }
+
+    if(step===2){
+      var ok=
+        sourceMode &&
+        value("foco") &&
+        value("periodo") &&
+        value("preguntaAnalisis");
+
+      setError("focusError",!ok);
+      return Boolean(ok);
+    }
+
+    if(step===3){
+      var ids=[
+        "fuente1","dato1","dice1","noDice1",
+        "fuente2","dato2","dice2","noDice2"
+      ];
+      var ok=ids.every(function(id){return Boolean(value(id));});
+      setError("evidenceError",!ok);
+      return Boolean(ok);
+    }
+
+    if(step===4){
+      var ok=
+        value("interpretacion") &&
+        value("evidenciaAdicional") &&
+        allCoherenceMarked() &&
+        value("reflexion");
+
+      setError("interpretationError",!ok);
+      return Boolean(ok);
+    }
+
+    return true;
+  }
+
+  function showStep(step){
+    currentStep=Math.max(1,Math.min(totalSteps,step));
+
+    document.querySelectorAll(".sise-panel").forEach(function(panel){
+      panel.classList.toggle(
+        "active",
+        Number(panel.getAttribute("data-step"))===currentStep
+      );
+    });
+
+    document.getElementById("progressLabel").textContent=
+      "Paso "+currentStep+" de "+totalSteps;
+
+    document.getElementById("progressFill").style.width=
+      ((currentStep/totalSteps)*100)+"%";
+
+    if(currentStep===3){
+      updateEvidencePreview();
+    }
+
+    if(currentStep===4){
+      updateFinalPreview();
+    }
+
+    setTimeout(function(){
+      var p=document.querySelector(".sise-progress-card");
+      if(p){
+        p.scrollIntoView({behavior:"smooth",block:"start"});
+      }
+    },60);
+  }
+
+  window.nextStep=function(){
+    if(!validateStep(currentStep))return;
+    showStep(currentStep+1);
+  };
+
+  window.prevStep=function(){
+    showStep(currentStep-1);
+  };
+
+  window.updateEvidencePreview=function(){
+    var el=document.getElementById("evidencePreview");
+    if(!el)return;
+
+    var parts=[];
+
+    if(value("fuente1") || value("dato1")){
+      parts.push(
+        "EVIDENCIA 1\n"+
+        "Fuente: "+(value("fuente1")||"—")+"\n"+
+        "Dato: "+(value("dato1")||"—")+"\n"+
+        "Observación: "+(value("dice1")||"—")+"\n"+
+        "Límite de interpretación: "+(value("noDice1")||"—")
+      );
+    }
+
+    if(value("fuente2") || value("dato2")){
+      parts.push(
+        "EVIDENCIA 2\n"+
+        "Fuente: "+(value("fuente2")||"—")+"\n"+
+        "Dato: "+(value("dato2")||"—")+"\n"+
+        "Observación: "+(value("dice2")||"—")+"\n"+
+        "Límite de interpretación: "+(value("noDice2")||"—")
+      );
+    }
+
+    el.textContent=
+      parts.length
+      ? parts.join("\n\n")
+      : "Completa las dos evidencias para visualizar una síntesis de tu análisis.";
+  };
+
+  [
+    "fuente1","dato1","dice1","noDice1",
+    "fuente2","dato2","dice2","noDice2"
+  ].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){
+      el.addEventListener("input",updateEvidencePreview);
+    }
+  });
+
+  function updateFinalPreview(){
+    var el=document.getElementById("finalPreview");
+    if(!el)return;
+
+    el.textContent=
+      "FOCO: "+(value("foco")||"—")+"\n\n"+
+      "PREGUNTA: "+(value("preguntaAnalisis")||"—")+"\n\n"+
+      "EVIDENCIA 1: "+(value("dato1")||"—")+"\n\n"+
+      "EVIDENCIA 2: "+(value("dato2")||"—")+"\n\n"+
+      "FUENTE DE TRABAJO: "+(sourceMode==="case"?"Caso ficticio Gestión de Proyectos":"Datos del curso del participante");
+  }
+
+  function pdfAddHeader(doc,title,subtitle){
+    doc.setFillColor(35,31,32);
+    doc.rect(0,0,210,30,"F");
+
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(18);
+    doc.text("SISE",15,13);
+
+    doc.setFontSize(12);
+    doc.text(title,45,12);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.setTextColor(255,178,201);
+    doc.text(subtitle,45,19);
+
+    doc.setDrawColor(255,0,80);
+    doc.setLineWidth(1.5);
+    doc.line(15,33,195,33);
+  }
+
+  function pdfAddFooter(doc,pageNumber){
+    doc.setDrawColor(230,220,224);
+    doc.setLineWidth(.3);
+    doc.line(15,282,195,282);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8);
+    doc.setTextColor(110,100,104);
+    doc.text(
+      "Canvas LMS para docentes · Actividad práctica · Módulo 2 · Tema 4",
+      15,
+      287
+    );
+    doc.text("Página "+pageNumber,195,287,{align:"right"});
+  }
+
+  function ensureSpace(doc,y,needed,pageRef,title,subtitle){
+    if(y+needed>277){
+      pdfAddFooter(doc,pageRef.value);
+      doc.addPage();
+      pageRef.value+=1;
+      pdfAddHeader(doc,title,subtitle);
+      return 43;
+    }
+    return y;
+  }
+
+  function addSectionTitle(doc,title,y){
+    doc.setFillColor(255,240,245);
+    doc.roundedRect(15,y-5,180,11,2,2,"F");
+    doc.setTextColor(255,0,80);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(11);
+    doc.text(title,19,y+2);
+    return y+12;
+  }
+
+  function addQuestionAnswer(doc,question,answer,y,pageRef,title,subtitle){
+    y=ensureSpace(doc,y,30,pageRef,title,subtitle);
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(35,31,32);
+
+    var qLines=doc.splitTextToSize(question,180);
+    doc.text(qLines,15,y);
+    y+=qLines.length*4.5+2;
+
+    doc.setFillColor(250,248,249);
+    doc.setDrawColor(232,223,226);
+
+    var answerLines=doc.splitTextToSize(answer||"Sin respuesta",170);
+    var boxHeight=Math.max(18,answerLines.length*4.5+9);
+
+    y=ensureSpace(doc,y,boxHeight+6,pageRef,title,subtitle);
+
+    doc.roundedRect(15,y,180,boxHeight,2,2,"FD");
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.setTextColor(85,78,81);
+    doc.text(answerLines,20,y+7);
+
+    return y+boxHeight+7;
+  }
+
+  function addCoherence(doc,items,y,pageRef,title,subtitle){
+    items.forEach(function(item){
+      y=ensureSpace(doc,y,13,pageRef,title,subtitle);
+
+      doc.setFillColor(19,138,91);
+      doc.circle(19,y-1,2.3,"F");
+
+      doc.setTextColor(255,255,255);
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(7);
+      doc.text("✓",19,y+1,{align:"center"});
+
+      doc.setTextColor(70,64,66);
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(9);
+
+      var lines=doc.splitTextToSize(item,165);
+      doc.text(lines,25,y+1);
+
+      y+=Math.max(8,lines.length*4.2+2);
+    });
+
+    return y+3;
+  }
+
+  function addEvidenceTable(doc,y,pageRef,title,subtitle){
+    var x=15;
+    var widths=[35,45,50,50];
+    var headers=["Fuente / reporte","Dato observado","Qué permite observar","Qué no permite afirmar"];
+    var rows=[
+      [value("fuente1"),value("dato1"),value("dice1"),value("noDice1")],
+      [value("fuente2"),value("dato2"),value("dice2"),value("noDice2")]
+    ];
+
+    function headerRow(yPos){
+      doc.setFillColor(35,31,32);
+      doc.setDrawColor(220,212,215);
+      var cx=x;
+
+      headers.forEach(function(h,idx){
+        doc.rect(cx,yPos,widths[idx],12,"FD");
+        doc.setTextColor(255,255,255);
+        doc.setFont("helvetica","bold");
+        doc.setFontSize(7.8);
+        var lines=doc.splitTextToSize(h,widths[idx]-4);
+        doc.text(lines,cx+2,yPos+5);
+        cx+=widths[idx];
+      });
+
+      return yPos+12;
+    }
+
+    y=ensureSpace(doc,y,20,pageRef,title,subtitle);
+    y=headerRow(y);
+
+    rows.forEach(function(cells){
+      var wrapped=cells.map(function(cell,idx){
+        return doc.splitTextToSize(cell||"Sin respuesta",widths[idx]-4);
+      });
+
+      var maxLines=Math.max.apply(null,wrapped.map(function(lines){return lines.length;}));
+      var rowHeight=Math.max(24,maxLines*4.1+8);
+
+      if(y+rowHeight>277){
+        pdfAddFooter(doc,pageRef.value);
+        doc.addPage();
+        pageRef.value+=1;
+        pdfAddHeader(doc,title,subtitle);
+        y=43;
+        y=headerRow(y);
+      }
+
+      var cx=x;
+
+      wrapped.forEach(function(lines,idx){
+        doc.setFillColor(idx===0 ? 255 : 250, idx===0 ? 247 : 248, idx===0 ? 250 : 249);
+        doc.setDrawColor(226,218,221);
+        doc.rect(cx,y,widths[idx],rowHeight,"FD");
+
+        doc.setTextColor(65,58,61);
+        doc.setFont(idx===0 ? "helvetica" : "helvetica",idx===0 ? "bold" : "normal");
+        doc.setFontSize(idx===0 ? 8.2 : 7.9);
+        doc.text(lines,cx+2,y+6);
+
+        cx+=widths[idx];
+      });
+
+      y+=rowHeight;
+    });
+
+    return y+8;
+  }
+
+  window.downloadPDF=function(){
+
+    if(
+      !validateStep(1) ||
+      !validateStep(2) ||
+      !validateStep(3) ||
+      !validateStep(4)
+    ){
+      alert("Antes de descargar, completa todos los datos, evidencias, interpretación, revisión de coherencia y reflexión.");
+      return;
+    }
+
+    if(!window.jspdf || !window.jspdf.jsPDF){
+      alert("No fue posible cargar el generador de PDF. Verifica tu conexión a internet y vuelve a intentarlo.");
+      return;
+    }
+
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+
+    var title="FICHA DE INTERPRETACIÓN DE ANALÍTICAS";
+    var subtitle="Lectura de reportes e indicadores antes de tomar decisiones";
+    var pageRef={value:1};
+
+    pdfAddHeader(doc,title,subtitle);
+
+    var y=43;
+
+    doc.setFillColor(255,240,245);
+    doc.roundedRect(15,y,180,62,3,3,"F");
+
+    doc.setTextColor(35,31,32);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(10);
+
+    doc.text("Participante",20,y+9);
+    doc.text("Correo",20,y+21);
+    doc.text("Curso",20,y+33);
+    doc.text("Fuente",20,y+45);
+    doc.text("Fecha",20,y+57);
+
+    doc.setFont("helvetica","normal");
+
+    doc.text(
+      doc.splitTextToSize(value("nombres")+" "+value("apellidos"),135),
+      52,
+      y+9
+    );
+
+    doc.text(
+      doc.splitTextToSize(value("correo"),135),
+      52,
+      y+21
+    );
+
+    doc.text(
+      doc.splitTextToSize(value("curso"),135),
+      52,
+      y+33
+    );
+
+    doc.text(
+      doc.splitTextToSize(sourceMode==="case" ? "Caso ficticio Gestión de Proyectos" : "Datos del curso del participante",135),
+      52,
+      y+45
+    );
+
+    doc.text(
+      new Date().toLocaleDateString("es-PE"),
+      52,
+      y+57
+    );
+
+    y+=72;
+
+    y=addSectionTitle(doc,"1. FOCO Y PREGUNTA DE ANÁLISIS",y);
+    y=addQuestionAnswer(doc,"Foco del análisis",value("foco"),y,pageRef,title,subtitle);
+    y=addQuestionAnswer(doc,"Periodo analizado",value("periodo"),y,pageRef,title,subtitle);
+    y=addQuestionAnswer(doc,"Pregunta de análisis",value("preguntaAnalisis"),y,pageRef,title,subtitle);
+
+    y=addSectionTitle(doc,"2. EVIDENCIAS E INDICADORES",y);
+    y=addEvidenceTable(doc,y,pageRef,title,subtitle);
+
+    y=addSectionTitle(doc,"3. INTERPRETACIÓN PROVISIONAL",y);
+    y=addQuestionAnswer(doc,"¿Qué interpretación puedes formular con las evidencias revisadas?",value("interpretacion"),y,pageRef,title,subtitle);
+    y=addQuestionAnswer(doc,"¿Qué evidencia adicional revisarías antes de tomar una decisión?",value("evidenciaAdicional"),y,pageRef,title,subtitle);
+
+    y=addSectionTitle(doc,"4. REVISIÓN DE COHERENCIA",y);
+    y=addCoherence(doc,coherenceValues(),y,pageRef,title,subtitle);
+
+    y=addSectionTitle(doc,"5. REFLEXIÓN PEDAGÓGICA",y);
+    y=addQuestionAnswer(
+      doc,
+      "¿Cómo cambia tu lectura del curso cuando analizas varias evidencias antes de tomar una decisión?",
+      value("reflexion"),
+      y,
+      pageRef,
+      title,
+      subtitle
+    );
+
+    y=ensureSpace(doc,y,34,pageRef,title,subtitle);
+
+    doc.setFillColor(35,31,32);
+    doc.roundedRect(15,y,180,28,3,3,"F");
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(255,255,255);
+    doc.text("ARCHIVO PARA ENTREGA",20,y+8);
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8.8);
+    doc.setTextColor(255,210,223);
+
+    var noteLines=doc.splitTextToSize(
+      "Sube este PDF en esta misma sección de tarea para ser calificado. Verifica que el archivo se haya descargado correctamente y guárdalo también, ya que lo utilizarás en la siguiente actividad.",
+      165
+    );
+
+    doc.text(noteLines,20,y+15);
+
+    pdfAddFooter(doc,pageRef.value);
+
+    var safeName=(
+      value("apellidos")+"_"+
+      value("nombres")+"_Ficha_interpretacion_analiticas_Canvas"
+    )
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-zA-Z0-9_-]+/g,"_");
+
+    doc.save(safeName+".pdf");
+
+    document.getElementById("uploadAlert").classList.add("show");
+    document.getElementById("nextActivityWrap").classList.add("show");
+  };
+
+})();
+</script>
+
+</body>
+</html>
